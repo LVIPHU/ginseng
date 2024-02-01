@@ -1,5 +1,5 @@
 {
-  "name": "@ginseng/data-access/data-access-inventory",
+  "name": "data-access-inventory",
   "version": "0.0.1",
   "dependencies": {
     "@swc/helpers": "~0.5.2"
