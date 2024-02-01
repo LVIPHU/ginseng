@@ -14,7 +14,11 @@
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
-    "paths": {}
+    "paths": {
+      "@ginseng/data-access/data-access-inventory": [
+        "libs/data-access/data-access-inventory/src/index.ts"
+      ]
+    }
   },
   "exclude": ["node_modules", "tmp"]
 }

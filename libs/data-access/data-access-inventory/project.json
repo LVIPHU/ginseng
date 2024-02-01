@@ -1,0 +1,23 @@
+{
+  "name": "data-access-data-access-inventory",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/data-access/data-access-inventory/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:swc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/data-access/data-access-inventory",
+        "main": "libs/data-access/data-access-inventory/src/index.ts",
+        "tsConfig": "libs/data-access/data-access-inventory/tsconfig.lib.json",
+        "assets": ["libs/data-access/data-access-inventory/*.md"]
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"]
+    }
+  },
+  "tags": ["backend"]
+}

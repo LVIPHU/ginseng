@@ -1,0 +1,320 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Emun
+
+enum TermType {
+  DAY
+  WEEK
+  MONTH
+  QUARTER
+  YEAR
+}
+
+enum PaymentMethod {
+  CASH
+  CREDIT_CARD
+}
+
+enum StatusPurchase {
+  CANCELED
+  PENDING
+  CONFIRMED
+  RECEIVED
+  COMPLETED
+}
+
+enum StatusOrder {
+  CANCELED
+  PENDING
+  CONFIRMED
+  SHIPPED
+  COMPLETED
+}
+
+// Storage
+
+model User {
+  id            String          @id @default(uuid())
+  name          String
+  username      String
+  email         String          @unique
+  phone         String          @unique
+  PurchaseOrder PurchaseOrder[]
+  SaleOrder     SaleOrder[]
+}
+
+model Warranty {
+  id         String   @id @default(uuid())
+  name       String
+  termNumber Int
+  termType   TermType
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  products Product[]
+}
+
+model Category {
+  id        String   @id @default(uuid())
+  name      String
+  image     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  images   Image[]
+  products Product[]
+}
+
+model Brand {
+  id        String   @id @default(uuid())
+  name      String
+  image     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  images   Image[]
+  products Product[]
+}
+
+model Warehouse {
+  id        String   @id @default(uuid())
+  name      String
+  address   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isActive  Boolean  @default(true)
+
+  Inventories    Inventory[]
+  SaleOrders     SaleOrder[]
+  PurchaseOrders PurchaseOrder[]
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  name        String
+  sku         String?  @unique
+  image       String?
+  unit        Json?
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  images        Image[]
+  Properties    Property[]
+  components    Component[] @relation(name: "ProductComponents")
+  brandId       String?
+  categoryId    String?
+  warrantyId    String?
+  componentOfId String?
+
+  brand       Brand?     @relation(fields: [brandId], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  category    Category?  @relation(fields: [categoryId], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  warranty    Warranty?  @relation(fields: [warrantyId], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  componentOf Component? @relation(fields: [componentOfId], references: [id], onDelete: SetNull, onUpdate: SetNull, name: "ComponentOfProduct")
+}
+
+model Component {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  productId  String
+  components Product[] @relation(name: "ComponentOfProduct")
+  product    Product   @relation(fields: [productId], references: [id], onDelete: Cascade, onUpdate: Cascade, name: "ProductComponents")
+}
+
+model Image {
+  id        String   @id @default(uuid())
+  image     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  brandId    String?
+  categoryId String?
+  productId  String?
+  variantId  String?
+
+  brand    Brand?    @relation(fields: [brandId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  product  Product?  @relation(fields: [productId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  variant  Variant?  @relation(fields: [variantId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model Variant {
+  id               String   @id @default(uuid())
+  name             String?
+  sku              String?  @unique
+  image            String?
+  price            String
+  cost             String
+  discount         Int      @default(0)
+  quantity         Int      @default(0)
+  unit             String
+  weight           Json?
+  packsize         Boolean  @default(false)
+  packsizeQuantity Int      @default(0)
+  packsizeRootId   Int
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  images         Image[]
+  Inventory      Inventory[]
+  PurchaseDetail PurchaseDetail[]
+  SaleDetail     SaleDetail[]
+}
+
+model Property {
+  id        String   @id @default(uuid())
+  name      String
+  value     Json
+  position  Int
+  isEdited  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  productId String @unique
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model Inventory {
+  id        String   @id @default(uuid())
+  quantity  Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  variantId       String
+  warehouseId     String?           @unique
+  InventoryReport InventoryReport[]
+
+  variant   Variant    @relation(fields: [variantId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  warehouse Warehouse? @relation(fields: [warehouseId], references: [id], onDelete: SetNull, onUpdate: SetNull)
+}
+
+model InventoryReport {
+  id            String   @id @default(uuid())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  inventoryData Json?
+
+  inventoryId String?
+
+  inventory Inventory? @relation(fields: [inventoryId], references: [id], onDelete: SetNull, onUpdate: SetNull)
+}
+
+// Delivery
+
+model Supplier {
+  id             String          @id @default(uuid())
+  name           String
+  email          String?         @unique
+  phone          String?         @unique
+  address        String?         @unique
+  isActive       Boolean         @default(true)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  PurchaseOrders PurchaseOrder[]
+  SaleOrders     SaleOrder[]
+}
+
+model Customer {
+  id        String   @id @default(uuid())
+  name      String
+  email     String?  @unique
+  phone     String?  @unique
+  address   String?  @unique
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model PurchaseOrder {
+  id             String         @id @default(uuid())
+  note           String?
+  paymentMethod  PaymentMethod
+  discountAmount Float          @default(0)
+  totalQuantity  Int            @default(0)
+  totalAmount    Float          @default(0)
+  status         StatusPurchase @default(PENDING)
+
+  userId         String?
+  suplierId      String?
+  warehouseId    String?
+  InvoiceFiles   InvoiceFile[]
+  PurchaseDetail PurchaseDetail[]
+
+  user      User?      @relation(fields: [userId], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  suplier   Supplier?  @relation(fields: [suplierId], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  warehouse Warehouse? @relation(fields: [warehouseId], references: [id], onDelete: SetNull, onUpdate: SetNull)
+}
+
+model PurchaseDetail {
+  id       String  @id @default(uuid())
+  name     String?
+  cost     Int?
+  discount Int?
+  unit     String?
+  quantity Int     @default(0)
+  subtotal Int?
+
+  purchaseId String
+  variantId  String
+
+  purchase PurchaseOrder @relation(fields: [purchaseId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  variant  Variant       @relation(fields: [variantId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model SaleOrder {
+  id             String        @id @default(uuid())
+  note           String?
+  paymentMethod  PaymentMethod
+  discountAmount Float         @default(0)
+  totalQuantity  Int           @default(0)
+  totalAmount    Float         @default(0)
+  status         StatusOrder   @default(PENDING)
+
+  userId       String?
+  customerId   String?
+  warehouseId  String?
+  SaleDetail   SaleDetail[]
+  InvoiceFiles InvoiceFile[]
+
+  user      User?      @relation(fields: [userId], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  customer  Supplier?  @relation(fields: [customerId], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  warehouse Warehouse? @relation(fields: [warehouseId], references: [id], onDelete: SetNull, onUpdate: SetNull)
+}
+
+model SaleDetail {
+  id       String  @id @default(uuid())
+  name     String?
+  cost     Int?
+  discount Int?
+  unit     String?
+  quantity Int     @default(0)
+  subtotal Int?
+
+  orderId   String
+  variantId String
+
+  order   SaleOrder @relation(fields: [orderId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  variant Variant   @relation(fields: [variantId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model InvoiceFile {
+  id      String  @id @default(uuid())
+  invoice String?
+
+  orderId    String
+  purchaseId String
+
+  order    SaleOrder     @relation(fields: [orderId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  purchase PurchaseOrder @relation(fields: [purchaseId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+}
