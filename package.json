@@ -14,10 +14,15 @@
   "dependencies": {
     "@nestjs/common": "^10.0.2",
     "@nestjs/core": "^10.0.2",
+    "@nestjs/graphql": "^12.1.1",
+    "@nestjs/mercurius": "^12.1.1",
     "@nestjs/platform-express": "^10.0.2",
+    "@nestjs/platform-fastify": "^10.3.3",
     "@prisma/client": "^5.9.0",
     "@swc/helpers": "~0.5.2",
     "axios": "^1.0.0",
+    "graphql": "^16.8.1",
+    "mercurius": "^13.3.3",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.0",
     "tslib": "^2.3.0"
