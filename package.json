@@ -5,7 +5,10 @@
   "scripts": {
     "dev": "nx run-many -t serve",
     "test": "nx run-many -t test",
-    "build": "nx run-many -t build"
+    "build": "nx run-many -t build",
+    "dockers:dev": "docker-compose -f tools/ginseng-environment/dev.docker-compose.yml up -d --no-recreate --remove-orphans",
+    "db:migrate:dev": "npx env-cmd -f .local.env npx prisma migrate dev",
+    "db:studio": "npx env-cmd -f .local.env npx prisma studio"
   },
   "private": true,
   "dependencies": {
